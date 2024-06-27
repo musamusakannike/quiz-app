@@ -16,9 +16,9 @@ const Quiz = () => {
         axios.get('https://opentdb.com/api.php?amount=10&type=multiple')
             .then(response => {
                 const data = response.data.results.map((item) => ({
-                    question: item.question,
-                    options: shuffleOptions([...item.incorrect_answers, item.correct_answer]),
-                    answer: item.correct_answer
+                    question: decodeHTMLEntities(item.question),
+                    options: shuffleOptions([...item.incorrect_answers.map(decodeHTMLEntities), decodeHTMLEntities(item.correct_answer)]),
+                    answer: decodeHTMLEntities(item.correct_answer)
                 }))
                 setQuestions(data)
                 setQuestion(data[0])
@@ -38,6 +38,12 @@ const Quiz = () => {
             options[j] = temp
         }
         return options
+    }
+
+    const decodeHTMLEntities = (text) => {
+        const textArea = document.createElement('textarea')
+        textArea.innerHTML = text
+        return textArea.value
     }
 
     const checkAnswer = (e, ans) => {
@@ -90,12 +96,11 @@ const Quiz = () => {
     }
 
     if (questions.length === 0) {
-        return (
-            <div className="loading-spinner">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-            </div>)
+        return (<div className="loading-spinner">
+            <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+            </div>
+        </div>)
     }
 
     return (
